@@ -1,19 +1,21 @@
+//go:generate stringer -type=TAG_TYPE
 package rpmdb
 
 import (
 	"bytes"
 	"encoding/binary"
-	"golang.org/x/xerrors"
 	"io"
 	"unsafe"
+
+	"golang.org/x/xerrors"
 )
 
 // ref. https://github.com/rpm-software-management/rpm/blob/rpm-4.11.3-release/lib/header_internal.h#L13-L19
 type entryInfo struct {
-	Tag    int32  /*!< Tag identifier. */
-	Type   uint32 /*!< Tag data type. */
-	Offset int32  /*!< Offset into data segment (ondisk only). */
-	Count  uint32 /*!< Number of tag elements. */
+	Tag    TAG_ID   /*!< Tag identifier. */
+	Type   TAG_TYPE /*!< Tag data type. */
+	Offset int32    /*!< Offset into data segment (ondisk only). */
+	Count  uint32   /*!< Number of tag elements. */
 }
 
 // ref. https://github.com/rpm-software-management/rpm/blob/rpm-4.11.3-release/lib/header_internal.h#L27-L33
@@ -63,10 +65,10 @@ func regionSwab(data []byte, peList []entryInfo, dataStart int32, dl int) []inde
 		pe := peList[i]
 		indexEntry := indexEntry{
 			Info: entryInfo{
-				Type:   HtonlU(pe.Type),
+				Type:   TAG_TYPE(HtonlU(uint32(pe.Type))),
 				Count:  HtonlU(pe.Count),
 				Offset: Htonl(pe.Offset),
-				Tag:    Htonl(pe.Tag),
+				Tag:    TAG_ID(Htonl(int32(pe.Tag))),
 			},
 		}
 		if i < len(peList)-1 {

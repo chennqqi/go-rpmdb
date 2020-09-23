@@ -23,4 +23,3 @@ func main() {
 	}
 	fmt.Printf("[Total Packages: %d]\n", len(pkgList))
 }
-
